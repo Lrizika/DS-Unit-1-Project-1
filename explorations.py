@@ -105,6 +105,8 @@ def get_modified(d, key='cpe_match', child_key='children', default=None):
 			return(d[child_key])
 df_1['cpe_match'] = df_1['configurations.nodes'].apply(get_modified)
 
+df_1.drop(columns=['configurations.nodes'], inplace=True)
+
 #%%
 # a = {'operator': 'AND',
 #  'children': [{'operator': 'OR',
@@ -229,7 +231,7 @@ df[df['vendor']==':axis'].loc[107647,'configurations.nodes'].iloc[-15]
 #apple
 #microsoft
 #
-chrome_points_awry, [] = df[(df['product']==':chrome') & (df['vendor']==':google') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+chrome_points_awry = df[(df['product']==':chrome') & (df['vendor']==':google') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
 
 chrome_points = df[(df['product']==':chrome') & (df['vendor']==':google') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
 
@@ -241,7 +243,7 @@ chrome_points = df[(df['product']==':chrome') & (df['vendor']==':google') & (df[
 # depending on notice given etc.
 firefox_points = df[(df['product']==':firefox') & (df['vendor']==':mozilla') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
 
-firefox_points_awry, [] = df[(df['product']==':firefox') & (df['vendor']==':mozilla') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+firefox_points_awry = df[(df['product']==':firefox') & (df['vendor']==':mozilla') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
 #.str[4:9].value_counts()
 
 #%%
@@ -250,7 +252,7 @@ firefox_points
 firefox_points_awry, []
 
 #%%
-safari_points_awry, [] = df[(df['product']==':safari') & (df['vendor']==':apple') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+safari_points_awry = df[(df['product']==':safari') & (df['vendor']==':apple') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
 safari_points = df[(df['product']==':safari') & (df['vendor']==':apple') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
 
 #%%
@@ -259,10 +261,18 @@ safari_points = df[(df['product']==':safari') & (df['vendor']==':apple') & (df['
 #%%
 # df[(df['product']==':edge') & (df['vendor']==':microsoft')].groupby('cve.CVE_data_meta.ID').first()
 #%%
-ie_points_awry, [] = df[(df['product']==':ie') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+ie_points_awry = df[(df['product']==':ie') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
 ie_points = df[(df['product']==':ie') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
+
 #%%
-edge_points_awry, [] = df[(df['product']==':edge') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+ie2_points_awry = df[(df['product']==':internet_explorer') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+ie2_points = df[(df['product']==':ie') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
+
+
+#%%
+
+#%%
+edge_points_awry = df[(df['product']==':edge') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
 edge_points = df[(df['product']==':edge') & (df['vendor']==':microsoft') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
 
 #%%
@@ -271,7 +281,7 @@ edge_points = df[(df['product']==':edge') & (df['vendor']==':microsoft') & (df['
 years = range(1996, 2020)
 browser_ys = {	'Chrome': [chrome_points, [], 'b', chrome_points_awry, []],
 				'Firefox': [firefox_points, [], 'r', firefox_points_awry, []],
-				'Internet Explorer': [ie_points, [], 'white', ie_points_awry, []],
+				'Internet Explorer': [ie_points, [], 'black', ie_points_awry, []],
 				'Safari': [safari_points, [], 'g', safari_points_awry, []],
 				'Edge': [edge_points, [], 'magenta', edge_points_awry, []]}
 for browser in browser_ys:
@@ -286,12 +296,32 @@ for browser in browser_ys:
 		else:
 			browser_ys[browser][4].append(0)
 
+i=0
+print(len(years))
+for year in years:
+
+	print(i)
+	if str(year) in ie2_points_awry:
+		browser_ys['Internet Explorer'][4][i] += ie2_points_awry[str(year)]
+	i+=1
+
 browser_ys['Firefox'][1]
 
 #%%
 import matplotlib.pyplot as pyplot
-pyplot.rcParams['figure.facecolor'] = '#002B36'
-pyplot.rcParams['axes.facecolor'] = 'black'
+pyplot.rcParams['figure.facecolor'] = '#002B3600'
+pyplot.rcParams['axes.facecolor'] = '#00000000'
+COLOR = 'black'
+pyplot.rcParams['text.color'] = COLOR
+pyplot.rcParams['axes.labelcolor'] = COLOR
+pyplot.rcParams['xtick.color'] = COLOR
+pyplot.rcParams['ytick.color'] = COLOR
+pyplot.rcParams['lines.color'] = COLOR
+pyplot.rcParams['grid.color'] = COLOR
+pyplot.rcParams['lines.color'] = COLOR
+pyplot.rcParams['legend.facecolor'] = '#ffffff19'
+# pyplot.rcParams['figure.edgecolor'] = COLOR
+pyplot.rcParams['axes.edgecolor'] = COLOR
 
 for browser in browser_ys:
 	pyplot.plot(years, browser_ys[browser][1], browser_ys[browser][2], label=browser)
@@ -304,24 +334,53 @@ pyplot.legend()
 pyplot.title('CVEs by year for different browsers, by CVE ID')
 pyplot.xlabel('Year')
 pyplot.ylabel('Number of CVEs')
+pyplot.grid()
 figure = pyplot.gcf()
 figure.set_size_inches((12,10))
 pyplot.show()
 
 for browser in browser_ys:
 	pyplot.plot(years, browser_ys[browser][4], browser_ys[browser][2], label=browser)
-# pyplot.plot(ie_points, color='turquoise', label='Internet Explorer')
-# pyplot.plot(firefox_points, color='r', label='Firefox')
-# pyplot.plot(chrome_points, color='b', label='Chrome')
-# pyplot.plot(safari_points, color='g', label='Safari')
-# pyplot.plot(edge_points, color='magenta', label='Edge')
+# for text in pyplot.legend().get_texts(): text.set_color('white')
 pyplot.legend()
 pyplot.title('CVEs by year for different browsers, by publication date')
 pyplot.xlabel('Year')
 pyplot.ylabel('Number of CVEs')
+pyplot.grid()
 figure = pyplot.gcf()
 figure.set_size_inches((12,10))
 pyplot.show()
+
+# pyplot.rcParams.keys()
+
+#%%
+total_points_awry = df.groupby('cve.CVE_data_meta.ID').first()['publishedDate'].str[:4].value_counts().sort_index()
+total_points = df.groupby('cve.CVE_data_meta.ID').first().index.str[4:8].value_counts().sort_index()
+
+#%%
+
+pyplot.plot(total_points.index, total_points, color='#252525')
+pyplot.title('Annual CVE counts, by CVE ID')
+pyplot.xlabel('Year')
+pyplot.ylabel('Number of CVEs')
+ax = pyplot.gcf().axes[0]
+ax.set_xticks(ax.get_xticks()[::2])
+pyplot.grid()
+figure = pyplot.gcf()
+figure.set_size_inches((12,10))
+pyplot.show()
+
+pyplot.plot(total_points_awry.index, total_points_awry, color='#252525')
+pyplot.title('Annual CVE counts, by publication date')
+pyplot.xlabel('Year')
+pyplot.ylabel('Number of CVEs')
+ax = pyplot.gcf().axes[0]
+ax.set_xticks(ax.get_xticks()[::2])
+pyplot.grid()
+figure = pyplot.gcf()
+figure.set_size_inches((12,10))
+pyplot.show()
+
 
 #%%
 # df[(df['product']==':firefox') & (df['vendor']==':mozilla') & (df['vulnerable']==True)].groupby('cve.CVE_data_meta.ID').first()
